@@ -1,0 +1,74 @@
+@import "tailwindcss";
+/* تنسيق الجدول */
+/* تنسيق الجدول */
+.tap{
+  background-image: url("assets/bg2.jpg");
+  background-size: cover;
+  
+}
+
+.styled-table {
+  
+  /* border-collapse: collapse; */
+ 
+  font-size: 18px;
+  text-align: left;
+  
+ 
+}
+/* tbody{
+  background-color: rgba(255, 255, 255, 0.3);
+} */
+
+ /* .styled-table th, .styled-table td {
+  padding: 15px 19px;
+  
+  
+}  */
+
+/* .styled-table th {
+  
+ 
+  text-transform: uppercase;
+} */
+
+
+.t 
+{
+  min-height: 200px;
+  
+}
+
+.montserrat-subrayada-bold {
+  font-family: "Montserrat Subrayada", serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+
+/* .fade-in {
+  animation: fadeIn 1s ease-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.styled-table tbody tr:hover {
+  background-color: #e0e0e0;
+}
+
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+} */
