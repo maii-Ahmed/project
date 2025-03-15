@@ -2,7 +2,7 @@
   "name": "app-6",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://maii-Ahmed.github.io/app6",
+  "homepage": "https://maii-Ahmed.github.io/app10",
   "type": "module",
   "scripts": {
     "predeploy": "npm run build",
