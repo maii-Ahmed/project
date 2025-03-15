@@ -201,77 +201,69 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+
 export default function Attandance() {
- let [attendance, setAttendance] = useState(null);
+  let [attendance, setAttendance] = useState(null);
 
- async function getProduct() {
-  let { data } = await axios.get(
-   'http://bigbrotherv01.runasp.net/api/Attendace/getallattendace',
+  async function getProduct() {
+    let { data } = await axios.get(
+      'https://bigbrotherv01.runasp.net/api/Attendace/getallattendace',
+    );
+    console.log(data);
+    setAttendance(data);
+  }
+
+  useEffect(() => {
+    getProduct();
+    const interval = setInterval(() => {
+      getProduct();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <>
+      {/* ✅ تعديل المسافة بحيث تكون الصفحة بجانب النافبار ومتجاوبة */}
+      <div className="tap min-h-screen montserrat-subrayada-bold pl-[70px] md:pl-[250px]">
+        <div className="flex flex-col justify-center items-center space-y-10">
+          <h2 className="mt-10 text-[#FFFFFF]/77 text-3xl font-bold border-b-4 pb-2">
+            ATTENDANCE
+          </h2>
+
+          {/* ✅ تحسين عرض الجدول ليكون متجاوبًا مع الشاشات الصغيرة */}
+          <div className="w-[95%] md:w-[100%] lg:w-[80%] mx-auto border-8 border-[#6B4A4A] rounded-xl">
+            <div className="overflow-x-auto">
+              <div className="max-h-[90vh] overflow-y-auto">
+                <table className="w-full min-w-[600px] border-collapse">
+                  <thead className="bg-[#FFFFFF]/69 text-white text-base">
+                    <tr className="text-center">
+                      <th className="px-6 py-4 border border-[#6B4A4A]">Student Name</th>
+                      <th className="px-6 py-4 border border-[#6B4A4A]">Student ID</th>
+                      <th className="px-6 py-4 border border-[#6B4A4A]">Course ID</th>
+                      <th className="px-6 py-4 border border-[#6B4A4A]">Assistant ID</th>
+                      <th className="px-6 py-4 border border-[#6B4A4A]">Date</th>
+                      <th className="px-6 py-4 border border-[#6B4A4A]">Time</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-[#D9D9D9]/40 border-t-gray-500 text-[19px]">
+                    {attendance?.map((p, i) => (
+                      <tr key={i} className="text-center">
+                        <td className="border-4 px-8 py-7 border-[#000000]/52 border-t-4 border-t-[#6B4A4A]">{p.studentName}</td>
+                        <td className="border-4 px-8 py-7 border-[#000000]/52 border-t-4 border-t-[#6B4A4A]">{p.studentId}</td>
+                        <td className="border-4 px-8 py-7 border-[#000000]/52 border-t-4 border-t-[#6B4A4A]">{p.courseId}</td>
+                        <td className="border-4 px-8 py-7 border-[#000000]/52 border-t-4 border-t-[#6B4A4A]">{p.asisstantId}</td>
+                        <td className="border-4 px-8 py-7 border-[#000000]/52 border-t-4 border-t-[#6B4A4A]">{p.date}</td>
+                        <td className="border-4 px-8 py-7 border-[#000000]/52 text-black border-t-4 border-t-[#6B4A4A]">{p.time}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </>
   );
-  console.log(data);
-  setAttendance(data);
- }
-
- useEffect(() => {
-  getProduct();
-  const interval = setInterval(() => {
-   getProduct();
-  }, 5000);
-  return () => clearInterval(interval);
- }, []);
-
- return (
-  <>
-   
-   <div className=' overflow-hidden tap h-64 min-h-screen montserrat-subrayada-bold  '>
-    <div className='mt-15  flex flex-col justify-center items-center space-y-5 '>
-     <h2 className='mt-10 text-[#FFFFFF]/77  border-b-2'>ATTENDANCE</h2>
-     
-     <div className=' overflow-auto  max-h-[80vh]  '>
-
-     <div className=" p-4 bg-[#FFFFFF]/69    rounded-t-2xl border-5 border-[#6B4A4A]">
-  <nav >
-
-  <thead className=' text-[#181818]/100   shadow-2xl   '>
-        <tr className=' '>
-        
-         <th className=' px-3 border-2-red-500  '>studentName</th>
-         <th className=' px-2  '>studentId</th>
-         <th className='px-2 '>courseId</th>
-         <th className='px-8 '>asisstantId</th>
-         <th className='px-13'>date</th>
-         <th className=' px-17'>time</th>
-        </tr>
-       </thead> 
-    
-  </nav>
-</div>
-     
-     <table className=' styled-table  w-[100%] mx-auto mt-3  border-6 border-[#6B4A4A] '>
-        
-     
-
-       <tbody className='text-[#181818]/100 border-t-4  bg-[#D9D9D9]/30   border-t-gray-500 ' >
-       
-        {attendance?.map((p, i) => (
-         <tr key={i} className=' '>
-          <td className=' border-4 px-0.5  border-[#000000]/52 border-s-amber-300 border-s-4 '>
-           {p.studentName}
-          </td>
-          <td className='p-10 border-4   border-[#000000]/52  '>{p.studentId}</td>
-          <td className='p-10 border-4 border-[#000000]/52 '>{p.courseId}</td>
-          <td className='p-9 border-4 border-[#000000]/52 '>{p.asisstantId}</td>
-          <td className='p-7 w-0.5 border-4 border-[#000000]/52'>{p.date}</td>
-          <td className= 'p-6 border-4 border-e-4  border-[#000000]/52 border-e-green-300 '>{p.time}</td>
-         </tr >
-        ))}
-       </tbody>
-      
-      </table>
-     </div>
-    
-    </div>
-   </div>
-  </>
- );
 }

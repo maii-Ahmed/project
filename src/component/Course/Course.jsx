@@ -22,8 +22,9 @@ import React from 'react'
 export default function Course() {
   return (
    <>
+   <div className='pl-[250px]'>
    
-   <table className="mt-15  table-layout">
+   <table className="mt-15  table-layout ">
   <thead>
     <tr>
       <th>Song</th>
@@ -49,6 +50,7 @@ export default function Course() {
     </tr>
   </tbody>
 </table>
+</div>
    </>
   )
 }
