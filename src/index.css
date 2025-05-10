@@ -1,20 +1,33 @@
 @import "tailwindcss";
 
-.tap{
+.tap {
+  min-height: 100vh; /* يغطي طول الشاشة */
   background-image: url("assets/bg2.jpg");
   background-size: cover;
-  
+  background-repeat: no-repeat;
+  background-position: center;
 }
+
 
 .styled-table {
   
-  /* border-collapse: collapse; */
+  
  
   font-size: 18px;
   text-align: left;
   
  
 }
+/* html  {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-image: url("assets/bg2.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+} */
+
 
 
 @media (max-width: 768px) {
