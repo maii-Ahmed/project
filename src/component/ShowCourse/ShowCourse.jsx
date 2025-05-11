@@ -48,6 +48,14 @@ export default function ShowCourse() {
     getProduct(searchTerm);
   };
 
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    if (!value) {
+      setAttendance([]); // مسح الداتا من الجدول لو السيرش فاضي
+    }
+  };
+
   useEffect(() => {
     // لن نستدعي الدالة تلقائيًا بدون ID
   }, []);
@@ -124,7 +132,7 @@ export default function ShowCourse() {
                     className="block w-full p-3 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white shadow-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
                     placeholder="Enter course ID to search..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={handleSearchChange}
                   />
                 </div>
               </form>

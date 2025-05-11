@@ -169,9 +169,6 @@ export default function Students() {
     }
   }
 
-  // Fetch students by course ID
-  
-
   // Handle student search
   const handleStudentSearch = (e) => {
     e.preventDefault();
@@ -180,8 +177,14 @@ export default function Students() {
     }
   };
 
-  // Handle course search
-  
+  // Handle clearing student search input
+  const handleStudentSearchChange = (e) => {
+    const value = e.target.value;
+    setStudentSearchTerm(value);
+    if (!value) {
+      setStudents([]); // Clear the table data if the search input is empty
+    }
+  };
 
   return (
     <div className="min-h-screen pt-20 tap montserrat-subrayada-bold mt-3">
@@ -198,11 +201,11 @@ export default function Students() {
       </Link>
       <div className="w-full">
         <div className="flex flex-col items-center justify-start">
-        <div>
-              <Link className="bg-[#237618] rounded-[7px] px-9 py-3 text-sm text-white" to="/AddAssistant">
-                ADD Assistant <i className="fa fa-pen ms-3"></i>
-              </Link>
-            </div>
+          <div>
+            <Link className="bg-[#237618] rounded-[7px] px-9 py-3 text-sm text-white" to="/AddAssistant">
+              ADD Assistant <i className="fa fa-pen ms-3"></i>
+            </Link>
+          </div>
         </div>
 
         <div className="ms-15 mt-9">
@@ -223,7 +226,7 @@ export default function Students() {
               className="block w-[90%] p-2 ps-10 text-sm text-black border border-gray-300 rounded-lg bg-[#D9D9D9]/49"
               placeholder="Enter student ID..."
               value={studentSearchTerm}
-              onChange={(e) => setStudentSearchTerm(e.target.value)}
+              onChange={handleStudentSearchChange}
             />
             <button
               type="submit"
@@ -233,8 +236,6 @@ export default function Students() {
             </button>
           </div>
         </form>
-
-       
 
         {/* Students Table */}
         <div className="w-full md:w-[80%] mx-auto overflow-x-auto">
@@ -259,15 +260,23 @@ export default function Students() {
               </tr>
             </thead>
             <tbody className="text-center">
-              {students.map((student, index) => (
-                <tr key={index} className="border">
-                  <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.name}</td>
-                  <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.id}</td>
-                  <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.phoneNumber}</td>
-                  <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.courses}</td>
-                  <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.attendances}</td>
+              {students.length > 0 ? (
+                students.map((student, index) => (
+                  <tr key={index} className="border">
+                    <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.name}</td>
+                    <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.id}</td>
+                    <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.phoneNumber}</td>
+                    <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.courses}</td>
+                    <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.attendances}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="px-4 py-2 text-center">
+                    No assistants found.
+                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

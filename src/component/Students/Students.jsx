@@ -239,16 +239,16 @@ export default function Students() {
   const [studentSearchTerm, setStudentSearchTerm] = useState(""); // For student search
   const [selectedCourseId, setSelectedCourseId] = useState(""); // For course selection
   const [courses, setCourses] = useState([]); // Store courses from localStorage
-  const [errorMessage, setErrorMessage] = useState(""); // For displaying errors
   const location = useLocation();
 
   // Fetch courses from localStorage on component mount
   useEffect(() => {
     const storedCourses = localStorage.getItem("courses");
     if (storedCourses) {
-      setCourses(JSON.parse(storedCourses));
+      const parsedCourses = JSON.parse(storedCourses);
+      setCourses(parsedCourses);
     } else {
-      setCourses([]); // If no courses, set empty array
+      setCourses([]);
     }
 
     // Check if there are uploaded students from UploadFile page
@@ -258,21 +258,25 @@ export default function Students() {
         : [location.state.uploadedStudents];
       console.log("Uploaded Students:", uploadedStudents);
       setStudents(uploadedStudents);
-      setErrorMessage(""); // Reset error message
     }
   }, [location.state]);
 
   // Fetch student data by ID
   async function getStudents(id) {
+    // Check if there are courses in localStorage
+    const storedCourses = JSON.parse(localStorage.getItem("courses")) || [];
+    if (storedCourses.length === 0) {
+      setStudents([]);
+      return;
+    }
+
     try {
       let { data } = await axios.get(`https://bigbrotherv01.runasp.net/api/Student/${id}`);
       console.log("student", data);
       setStudents(Array.isArray(data) ? data : [data]);
-      setErrorMessage(""); // Reset error message
     } catch (error) {
       console.error("Error fetching students:", error);
       setStudents([]);
-      setErrorMessage("Failed to fetch student. Please check the Student ID and try again.");
     }
   }
 
@@ -284,15 +288,12 @@ export default function Students() {
 
       if (data && data.value && Array.isArray(data.value)) {
         setStudents(data.value);
-        setErrorMessage(""); // Reset error message
       } else {
         setStudents([]);
-        setErrorMessage("No students found for this course. Please select a valid course.");
       }
     } catch (error) {
       console.error("Error fetching course students:", error);
       setStudents([]);
-      setErrorMessage("Failed to fetch students for this course. Please try again.");
     }
   }
 
@@ -313,7 +314,6 @@ export default function Students() {
       getCourseStudents(courseId);
     } else {
       setStudents([]); // Clear students if no course selected
-      setErrorMessage(""); // Clear error message
     }
   };
 
@@ -323,7 +323,6 @@ export default function Students() {
     setStudentSearchTerm(value);
     if (!value) {
       setStudents([]); // Clear the table data
-      setErrorMessage(""); // Clear any error message
     }
   };
 
@@ -389,13 +388,6 @@ export default function Students() {
             </span>
           </li>
         </div>
-
-        {/* Display error message if exists */}
-        {errorMessage && (
-          <div className="max-w-md mx-auto mb-4 p-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 text-center">
-            {errorMessage}
-          </div>
-        )}
 
         {/* Student Search Form - Above table on the right */}
         <div className="w-full md:w-[80%] mx-auto flex justify-end mb-2">
@@ -485,9 +477,3 @@ export default function Students() {
     </div>
   );
 }
-
-
-
-
-
-

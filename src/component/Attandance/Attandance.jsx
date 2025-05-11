@@ -524,10 +524,20 @@ export default function Attendance() {
 
   // Fetch attendance data for a specific ID
   async function getAttendance(Id) {
+    // Check if there are courses in localStorage
+    const storedCourses = JSON.parse(localStorage.getItem("courses")) || [];
+    if (storedCourses.length === 0) {
+      setAttendance([]);
+      setTotalPages(1);
+      return;
+    }
+
     try {
       const token = getToken();
       if (!token) {
-        throw new Error('No authentication token found. Please log in.');
+        setAttendance([]);
+        setTotalPages(1);
+        return;
       }
 
       let { data } = await axios.get(`https://bigbrotherv01.runasp.net/api/Attendance/${Id}`, {
@@ -546,11 +556,6 @@ export default function Attendance() {
       }
     } catch (err) {
       console.log('Error (ID Search):', err);
-      if (err.response?.status === 401) {
-        alert('غير مصرح: برجاء تسجيل الدخول مرة أخرى.');
-      } else {
-        alert('فشل في جلب بيانات الحضور. برجاء المحاولة مرة أخرى.');
-      }
       setAttendance([]);
       setTotalPages(1);
     }
@@ -558,10 +563,20 @@ export default function Attendance() {
 
   // Fetch attendance data for a specific student by ID
   async function getAttendanceId(StudentId) {
+    // Check if there are courses in localStorage
+    const storedCourses = JSON.parse(localStorage.getItem("courses")) || [];
+    if (storedCourses.length === 0) {
+      setAttendance([]);
+      setTotalPages(1);
+      return;
+    }
+
     try {
       const token = getToken();
       if (!token) {
-        throw new Error('No authentication token found. Please log in.');
+        setAttendance([]);
+        setTotalPages(1);
+        return;
       }
 
       let { data } = await axios.get(`https://bigbrotherv01.runasp.net/api/Attendance/for-student/${StudentId}`, {
@@ -580,11 +595,6 @@ export default function Attendance() {
       }
     } catch (err) {
       console.log('Error (Student ID Search):', err);
-      if (err.response?.status === 401) {
-        alert('غير مصرح: برجاء تسجيل الدخول مرة أخرى.');
-      } else {
-        alert('فشل في جلب بيانات الحضور. برجاء المحاولة مرة أخرى.');
-      }
       setAttendance([]);
       setTotalPages(1);
     }
@@ -595,7 +605,9 @@ export default function Attendance() {
     try {
       const token = getToken();
       if (!token) {
-        throw new Error('No authentication token found. Please log in.');
+        setAttendance([]);
+        setTotalPages(1);
+        return;
       }
 
       const { data } = await axios.get(
@@ -619,13 +631,6 @@ export default function Attendance() {
       }
     } catch (err) {
       console.error('Error (Course Search):', err);
-      if (err.response?.status === 401) {
-        alert('غير مصرح: برجاء تسجيل الدخول مرة أخرى.');
-        // Optionally redirect to login page
-        // window.location.href = '/login';
-      } else {
-        alert('فشل في جلب بيانات الحضور للكورس. برجاء المحاولة مرة أخرى.');
-      }
       setAttendance([]);
       setTotalPages(1);
     }
@@ -634,13 +639,12 @@ export default function Attendance() {
   // Download attendance data as a file
   async function downloadAttendance() {
     if (!selectedCourseId) {
-      alert('برجاء اختيار معرف الكورس لتحميل بيانات الحضور.');
       return;
     }
     try {
       const token = getToken();
       if (!token) {
-        throw new Error('No authentication token found. Please log in.');
+        return;
       }
 
       const response = await axios.get(
@@ -677,11 +681,6 @@ export default function Attendance() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.log('Error (Download):', err);
-      if (err.response?.status === 401) {
-        alert('غير مصرح: برجاء تسجيل الدخول مرة أخرى.');
-      } else {
-        alert('فشل في تحميل ملف الحضور. برجاء المحاولة مرة أخرى.');
-      }
     }
   }
 
