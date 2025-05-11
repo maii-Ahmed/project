@@ -95,12 +95,13 @@
 //   )
 // }
 // import React, { useContext } from 'react';
+import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import image1 from "../../assets/loogo.jpg";
 import { AuthContext } from '../../ContextProvider/ContextProvider';
 
 export default function Navbar() {
-  // let{token ,setToken}=useContext(AuthContext)
+  let{token ,setToken}=useContext(AuthContext)
     //  let{token,setToken}=  useContext(Context)
  let Navigate=   useNavigate()
   function logOut(){
@@ -124,7 +125,7 @@ export default function Navbar() {
         </div>
 
         {/* القائمة الرئيسية */}
-       <ul id="menu" className='hidden md:flex flex-col md:flex-row gap-4 md:gap-14 text-black mt-2 md:mt-0 md:ml-4 text-left'>
+       {token? <ul id="menu" className='hidden md:flex flex-col md:flex-row gap-4 md:gap-14 text-black mt-2 md:mt-0 md:ml-4 text-left'>
           <li className='text-[#4B1A1A] hover:scale-110 transition-transform duration-700 ms-4'>
             <Link to="/Attandance">ATTENDANCE</Link>
           </li>
@@ -138,7 +139,7 @@ export default function Navbar() {
             <Link to="/Asisstants">Asisstants</Link>
           </li>
          
-        </ul>
+        </ul>:null}
 
         {/* أيقونة المستخدم */}
         <div className='flex items-center gap-2 mt-2 md:mt-0 ml-auto'>
@@ -147,14 +148,14 @@ export default function Navbar() {
           </div>
           <h2>AMR</h2>
          
-         <h2><span onClick={logOut}> logout</span></h2> 
+          {token?<h2><span onClick={logOut}> logout</span></h2> :
         <>
           
           <h2><Link to={""}>Login</Link></h2> 
-       
+        <h2><Link to={"/Register"}>Register</Link></h2>
   
         </>
-       
+        }
           
          
    
@@ -164,4 +165,3 @@ export default function Navbar() {
     </nav>
   );
 }
-

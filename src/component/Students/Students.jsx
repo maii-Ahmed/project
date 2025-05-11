@@ -237,12 +237,21 @@ import image from "../../assets/image1.jpg";
 export default function Students() {
   const [students, setStudents] = useState([]);
   const [studentSearchTerm, setStudentSearchTerm] = useState(""); // For student search
-  const [courseSearchTerm, setCourseSearchTerm] = useState(""); // For course search
+  const [selectedCourseId, setSelectedCourseId] = useState(""); // For course selection
+  const [courses, setCourses] = useState([]); // Store courses from localStorage
   const [errorMessage, setErrorMessage] = useState(""); // For displaying errors
   const location = useLocation();
 
-  // Check if there are uploaded students from UploadFile page
+  // Fetch courses from localStorage on component mount
   useEffect(() => {
+    const storedCourses = localStorage.getItem("courses");
+    if (storedCourses) {
+      setCourses(JSON.parse(storedCourses));
+    } else {
+      setCourses([]); // If no courses, set empty array
+    }
+
+    // Check if there are uploaded students from UploadFile page
     if (location.state?.uploadedStudents) {
       const uploadedStudents = Array.isArray(location.state.uploadedStudents)
         ? location.state.uploadedStudents
@@ -278,28 +287,33 @@ export default function Students() {
         setErrorMessage(""); // Reset error message
       } else {
         setStudents([]);
-        setErrorMessage("No students found for this course. Please check the Course ID.");
+        setErrorMessage("No students found for this course. Please select a valid course.");
       }
     } catch (error) {
       console.error("Error fetching course students:", error);
       setStudents([]);
-      setErrorMessage("Failed to fetch students for this course. Please check the Course ID and try again.");
+      setErrorMessage("Failed to fetch students for this course. Please try again.");
     }
   }
 
   // Handle student search
   const handleStudentSearch = (e) => {
     e.preventDefault();
+    setSelectedCourseId(''); // Clear selected course when searching by student ID
     if (studentSearchTerm) {
       getStudents(studentSearchTerm);
     }
   };
 
-  // Handle course search
-  const handleCourseSearch = (e) => {
-    e.preventDefault();
-    if (courseSearchTerm) {
-      getCourseStudents(courseSearchTerm);
+  // Handle course selection change
+  const handleCourseChange = (e) => {
+    const courseId = e.target.value;
+    setSelectedCourseId(courseId);
+    if (courseId) {
+      getCourseStudents(courseId);
+    } else {
+      setStudents([]); // Clear students if no course selected
+      setErrorMessage(""); // Clear error message
     }
   };
 
@@ -307,16 +321,6 @@ export default function Students() {
   const handleStudentSearchChange = (e) => {
     const value = e.target.value;
     setStudentSearchTerm(value);
-    if (!value) {
-      setStudents([]); // Clear the table data
-      setErrorMessage(""); // Clear any error message
-    }
-  };
-
-  // Handle clearing course search input
-  const handleCourseSearchChange = (e) => {
-    const value = e.target.value;
-    setCourseSearchTerm(value);
     if (!value) {
       setStudents([]); // Clear the table data
       setErrorMessage(""); // Clear any error message
@@ -357,44 +361,27 @@ export default function Students() {
           </div>
         </div>
 
-        {/* Course Search Form - Above NAME OF COURSE */}
+        {/* Course Selection Dropdown - Above NAME OF COURSE */}
         <div className="ms-15 mt-15">
-          <form className="max-w-md m-6" onSubmit={handleCourseSearch}>
+          <form className="max-w-md m-6">
             <div className="relative flex items-center">
-              <div className="absolute inset-y-0 start-0 flex items-center ps-3">
-                <svg
-                  className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                  />
-                </svg>
-              </div>
-              <input
-                type="search"
+              <select
+                value={selectedCourseId}
+                onChange={handleCourseChange}
                 className="block w-[60%] p-2 ps-10 text-sm text-black border border-gray-300 rounded-lg bg-white"
-                placeholder="Enter course ID..."
-                value={courseSearchTerm}
-                onChange={handleCourseSearchChange} // Updated handler
-              />
-              <button
-                type="submit"
-                className="ml-2 bg-[#237618] text-white px-4 py-2 rounded-lg hover:bg-[#1a5c13] transition duration-200"
               >
-                search
-              </button>
+                <option value="">Select a course...</option>
+                {courses.map((course) => (
+                  <option key={course.courseId} value={course.courseId}>
+                    {course.courseName} (ID: {course.courseId})
+                  </option>
+                ))}
+              </select>
             </div>
           </form>
 
           <li>
-            <span className="text-white">NAME OF COURSE: DATA BASE</span>
+            <span className="text-white">NAME OF COURSE: {courses.find(c => c.courseId === selectedCourseId)?.courseName || "N/A"}</span>
           </li>
           <li>
             <span className="text-white">
@@ -435,7 +422,7 @@ export default function Students() {
                 className="block w-[70%] p-2 ps-10 text-sm text-black border border-gray-300 rounded-lg bg-[#D9D9D9]/49"
                 placeholder="Enter student ID..."
                 value={studentSearchTerm}
-                onChange={handleStudentSearchChange} // Updated handler
+                onChange={handleStudentSearchChange}
               />
               <button
                 type="submit"
@@ -480,7 +467,7 @@ export default function Students() {
                   <tr key={index} className="border">
                     <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.name || "N/A"}</td>
                     <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.id || "N/A"}</td>
-                    <td className="px-4 py connaissent-2 border-2 border-[#6B4A4A]">{student.code || "N/A"}</td>
+                    <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.code || "N/A"}</td>
                     <td className="px-4 py-2 border-2 border-[#6B4A4A]">{student.department || "N/A"}</td>
                   </tr>
                 ))
@@ -498,3 +485,9 @@ export default function Students() {
     </div>
   );
 }
+
+
+
+
+
+

@@ -1,91 +1,149 @@
+
+
+
 // import React, { useEffect, useState } from 'react';
 // import axios from 'axios';
 // import { Link } from 'react-router-dom';
 // import image from '../../assets/image1.jpg';
 
-// export default function Attandance() {
+// export default function Attendance() {
 //   const [attendance, setAttendance] = useState(null);
 //   const [sortOrder, setSortOrder] = useState('desc'); // Default sorting order: descending
 //   const [hoveredStudent, setHoveredStudent] = useState(null); // Track hovered student
 //   const [searchId, setSearchId] = useState(''); // State for ID search input
 //   const [searchStudentId, setSearchStudentId] = useState(''); // State for student ID search input
 //   const [searchCourseId, setSearchCourseId] = useState(''); // State for course ID search input
+//   const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
+//   const [totalPages, setTotalPages] = useState(1); // Total pages for pagination
+//   const fixedPageSize = 20; // Fixed page size for Course ID search
+
+//   // Retrieve Bearer Token from localStorage
+//   const getToken = () => {
+//     return localStorage.getItem('token'); // Adjust based on where your token is stored
+//   };
 
 //   // Fetch attendance data for a specific ID
-//   async function getAttandance(Id) {
+//   async function getAttendance(Id) {
 //     try {
-//       let { data } = await axios.get(`https://bigbrotherv01.runasp.net/api/Attendace/${Id}`);
+//       let { data } = await axios.get(`https://bigbrotherv01.runasp.net/api/Attendance/${Id}`);
 //       console.log('API Response (ID):', data);
 //       const attendanceData = data.value;
 //       if (Array.isArray(attendanceData)) {
 //         setAttendance(attendanceData);
+//         setTotalPages(1); // No pagination for ID search
 //       } else {
 //         setAttendance([]);
+//         setTotalPages(1);
 //       }
 //     } catch (err) {
-//       console.log('Error:', err);
+//       console.log('Error (ID Search):', err);
 //       setAttendance([]);
+//       setTotalPages(1);
 //     }
 //   }
 
 //   // Fetch attendance data for a specific student by ID
-//   async function getAttandanceId(StudentId) {
+//   async function getAttendanceId(StudentId) {
 //     try {
-//       let { data } = await axios.get(`https://bigbrotherv01.runasp.net/api/Attendace/for-student/${StudentId}`);
+//       let { data } = await axios.get(`https://bigbrotherv01.runasp.net/api/Attendance/for-student/${StudentId}`);
 //       console.log('API Response (Student ID):', data);
 //       const attendanceData = data.value;
 //       if (Array.isArray(attendanceData)) {
 //         setAttendance(attendanceData);
+//         setTotalPages(1); // No pagination for Student ID search
 //       } else {
 //         setAttendance([]);
+//         setTotalPages(1);
 //       }
 //     } catch (err) {
-//       console.log('Error:', err);
+//       console.log('Error (Student ID Search):', err);
 //       setAttendance([]);
+//       setTotalPages(1);
 //     }
 //   }
 
-//   // Fetch attendance data for a specific course by ID
-//   async function getAttandanceCourseId(CourseId) {
+//   // Fetch attendance data for a specific course with pagination
+//   async function getAttendanceByCourse(courseId, pageNumber) {
 //     try {
-//       let { data } = await axios.get(`https://bigbrotherv01.runasp.net/api/Attendace/for-course/${CourseId}`);
-//       console.log('API Response (Course ID):', data);
-//       const attendanceData = data.value;
-//       if (Array.isArray(attendanceData)) {
+//       const token = getToken();
+//       if (!token) {
+//         throw new Error('No authentication token found. Please log in.');
+//       }
+
+//       const { data } = await axios.get(
+//         `https://bigbrotherv01.runasp.net/api/Attendance/for-course?courseId=${courseId}&PageNumber=${pageNumber}&PageSize=${fixedPageSize}`,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//           },
+//         }
+//       );
+//       console.log('API Response (Course):', data);
+//       const attendanceData = data.value?.items || [];
+//       const totalPagesFromApi = data.value?.totalPages || 1;
+//       console.log('Attendance Data:', attendanceData, 'Total Pages:', totalPagesFromApi);
+//       if (Array.isArray(attendanceData) && attendanceData.length > 0) {
 //         setAttendance(attendanceData);
+//         setTotalPages(totalPagesFromApi);
 //       } else {
 //         setAttendance([]);
+//         setTotalPages(1);
 //       }
 //     } catch (err) {
-//       console.log('Error:', err);
+//       console.error('Error (Course Search):', err);
+//       if (err.response?.status === 401) {
+//         alert('غير مصرح: برجاء تسجيل الدخول مرة أخرى.');
+//         // Optionally redirect to login page
+//         // window.location.href = '/login';
+//       } else {
+//         alert('فشل في جلب بيانات الحضور للكورس. برجاء المحاولة مرة أخرى.');
+//       }
 //       setAttendance([]);
+//       setTotalPages(1);
 //     }
 //   }
 
-//   // Fetch all attendance data
-//   async function getProduct() {
+//   // Download attendance data as a file
+//   async function downloadAttendance() {
+//     if (!searchCourseId) {
+//       alert('برجاء إدخال معرف الكورس لتحميل بيانات الحضور.');
+//       return;
+//     }
 //     try {
-//       let { data } = await axios.get('https://bigbrotherv01.runasp.net/api/Attendace/all');
-//       console.log('All Attendance Data:', data);
-//       const sortedData = [...data].sort((a, b) => {
-//         const dateA = new Date(a.date);
-//         const dateB = new Date(b.date);
-//         return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+//       const response = await axios.get(
+//         `https://bigbrotherv01.runasp.net/api/Attendance/download?courseId=${searchCourseId}`,
+//         { responseType: 'blob' }
+//       );
+//       console.log('Download Response:', response);
+
+//       // Extract filename from content-disposition header if available
+//       let filename = `attendance_course_${searchCourseId}.xlsx`;
+//       const disposition = response.headers['content-disposition'];
+//       if (disposition && disposition.indexOf('attachment') !== -1) {
+//         const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+//         const matches = filenameRegex.exec(disposition);
+//         if (matches != null && matches[1]) {
+//           filename = matches[1].replace(/['"]/g, '');
+//         }
+//       }
+
+//       // Create Blob with the correct content-type
+//       const blob = new Blob([response.data], {
+//         type: response.headers['content-type'] || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 //       });
-//       setAttendance(sortedData);
+//       const url = window.URL.createObjectURL(blob);
+//       const link = document.createElement('a');
+//       link.href = url;
+//       link.setAttribute('download', filename); // Use the filename from API
+//       document.body.appendChild(link);
+//       link.click();
+//       document.body.removeChild(link);
+//       window.URL.revokeObjectURL(url);
 //     } catch (err) {
-//       console.log('Error fetching all attendance:', err);
-//       setAttendance([]);
+//       console.log('Error (Download):', err);
+//       alert('فشل في تحميل ملف الحضور. برجاء المحاولة مرة أخرى.');
 //     }
 //   }
-
-//   useEffect(() => {
-//     getProduct();
-//     const interval = setInterval(() => {
-//       getProduct();
-//     }, 5000);
-//     return () => clearInterval(interval);
-//   }, [sortOrder]); // Re-fetch and sort when sortOrder changes
 
 //   // Sort data when the sort button is clicked
 //   const sortData = (order) => {
@@ -103,9 +161,10 @@
 //   const handleIdSearch = (e) => {
 //     e.preventDefault();
 //     if (searchId.trim() === '') {
-//       getProduct();
+//       setAttendance([]); // Clear attendance if search is empty
+//       setTotalPages(1);
 //     } else {
-//       getAttandance(searchId);
+//       getAttendance(searchId);
 //     }
 //   };
 
@@ -113,26 +172,72 @@
 //   const handleStudentSearch = (e) => {
 //     e.preventDefault();
 //     if (searchStudentId.trim() === '') {
-//       getProduct();
+//       setAttendance([]); // Clear attendance if search is empty
+//       setTotalPages(1);
 //     } else {
-//       getAttandanceId(searchStudentId);
+//       getAttendanceId(searchStudentId);
 //     }
 //   };
 
 //   // Handle search form submission for Course ID
 //   const handleCourseSearch = (e) => {
 //     e.preventDefault();
+//     const token = getToken();
+//     if (!token) {
+//       alert('لا يوجد توكن تصريح. برجاء تسجيل الدخول.');
+//       return;
+//     }
 //     if (searchCourseId.trim() === '') {
-//       getProduct();
-//     } else {
-//       getAttandanceCourseId(searchCourseId);
+//       setAttendance([]); // Clear attendance if search is empty
+//       setTotalPages(1);
+//       return;
+//     }
+//     setCurrentPage(1);
+//     getAttendanceByCourse(searchCourseId, 1);
+//   };
+
+//   // Handle page change for pagination
+//   const handlePageChange = (page) => {
+//     console.log('Changing page to:', page); // Debug
+//     if (page < 1 || page > totalPages) return;
+//     setCurrentPage(page);
+//     if (searchCourseId) {
+//       getAttendanceByCourse(searchCourseId, page);
+//     }
+//   };
+
+//   // Handle clearing data when search fields are emptied
+//   const handleSearchIdChange = (e) => {
+//     const value = e.target.value;
+//     setSearchId(value);
+//     if (value.trim() === '') {
+//       setAttendance([]); // Clear data if the field is empty
+//       setTotalPages(1);
+//     }
+//   };
+
+//   const handleSearchStudentIdChange = (e) => {
+//     const value = e.target.value;
+//     setSearchStudentId(value);
+//     if (value.trim() === '') {
+//       setAttendance([]); // Clear data if the field is empty
+//       setTotalPages(1);
+//     }
+//   };
+
+//   const handleSearchCourseIdChange = (e) => {
+//     const value = e.target.value;
+//     setSearchCourseId(value);
+//     if (value.trim() === '') {
+//       setAttendance([]); // Clear data if the field is empty
+//       setTotalPages(1);
 //     }
 //   };
 
 //   // Debug: Log the attendance state whenever it changes
 //   useEffect(() => {
-//     console.log('Current attendance state:', attendance);
-//   }, [attendance]);
+//     console.log('Current attendance state:', attendance, 'Total Pages:', totalPages);
+//   }, [attendance, totalPages]);
 
 //   return (
 //     <>
@@ -177,7 +282,7 @@
 //                     className="block w-full p-3 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white shadow-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
 //                     placeholder="Enter ID to search..."
 //                     value={searchId}
-//                     onChange={(e) => setSearchId(e.target.value)}
+//                     onChange={handleSearchIdChange}
 //                   />
 //                 </div>
 //               </form>
@@ -217,7 +322,7 @@
 //                     className="block w-full p-3 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white shadow-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
 //                     placeholder="Enter student ID to search..."
 //                     value={searchStudentId}
-//                     onChange={(e) => setSearchStudentId(e.target.value)}
+//                     onChange={handleSearchStudentIdChange}
 //                   />
 //                 </div>
 //               </form>
@@ -257,7 +362,7 @@
 //                     className="block w-full p-3 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white shadow-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
 //                     placeholder="Enter course ID to search..."
 //                     value={searchCourseId}
-//                     onChange={(e) => setSearchCourseId(e.target.value)}
+//                     onChange={handleSearchCourseIdChange}
 //                   />
 //                 </div>
 //               </form>
@@ -272,8 +377,45 @@
 //               </div>
 //             </div>
 
-//             <div className="max-h-[80vh] overflow-y-auto border-[#6B4A4A] rounded-xl mt-9">
-//               <table className="w-full border-collapse border-8">
+//             {/* Pagination Controls and Download Button (Above Table) */}
+//             {(totalPages > 1 || searchCourseId) && (
+//               <div className="flex justify-center mb-4 space-x-2">
+//                 {console.log('Rendering Pagination Controls', { currentPage, totalPages })} {/* Debug */}
+//                 {totalPages > 1 && (
+//                   <>
+//                     <button
+//                       onClick={() => handlePageChange(currentPage - 1)}
+//                       disabled={currentPage === 1}
+//                       className="px-4 py-2 bg-green-700 text-white rounded-lg disabled:bg-gray-400 hover:bg-green-800 transition"
+//                     >
+//                       Previous
+//                     </button>
+//                     <span className="px-4 py-2 text-white">
+//                       Page {currentPage} of {totalPages}
+//                     </span>
+//                     <button
+//                       onClick={() => handlePageChange(currentPage + 1)}
+//                       disabled={currentPage === totalPages}
+//                       className="px-4 py-2 bg-green-700 text-white rounded-lg disabled:bg-gray-400 hover:bg-green-800 transition"
+//                     >
+//                       Next
+//                     </button>
+//                   </>
+//                 )}
+//                 {searchCourseId && (
+//                   <button
+//                     onClick={downloadAttendance}
+//                     className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition"
+//                   >
+//                     Download
+//                   </button>
+//                 )}
+//               </div>
+//             )}
+
+//             {/* Scrollable Table Container */}
+//             <div className="w-full md:w-[103%] mx-auto overflow-x-auto border-[#6B4A4A] rounded-xl mt-9">
+//               <table className="w-full border-collapse border-8 bg-[#D9D9D9]/30 min-h-full">
 //                 <thead className="bg-[#FFFFFF]/69 text-[#000000] text-sm md:text-base">
 //                   <tr className="text-center">
 //                     <th className="px-3 py-4 border border-[#6B4A4A] whitespace-nowrap">id</th>
@@ -355,6 +497,9 @@
 // }
 
 
+
+
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -362,19 +507,34 @@ import image from '../../assets/image1.jpg';
 
 export default function Attendance() {
   const [attendance, setAttendance] = useState(null);
+  const [courses, setCourses] = useState([]); // State to store courses list
   const [sortOrder, setSortOrder] = useState('desc'); // Default sorting order: descending
   const [hoveredStudent, setHoveredStudent] = useState(null); // Track hovered student
   const [searchId, setSearchId] = useState(''); // State for ID search input
   const [searchStudentId, setSearchStudentId] = useState(''); // State for student ID search input
-  const [searchCourseId, setSearchCourseId] = useState(''); // State for course ID search input
+  const [selectedCourseId, setSelectedCourseId] = useState(''); // State for selected course ID
   const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
   const [totalPages, setTotalPages] = useState(1); // Total pages for pagination
   const fixedPageSize = 20; // Fixed page size for Course ID search
 
+  // Retrieve Bearer Token from localStorage
+  const getToken = () => {
+    return localStorage.getItem('token'); // Adjust based on where your token is stored
+  };
+
   // Fetch attendance data for a specific ID
   async function getAttendance(Id) {
     try {
-      let { data } = await axios.get(`https://bigbrotherv01.runasp.net/api/Attendance/${Id}`);
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found. Please log in.');
+      }
+
+      let { data } = await axios.get(`https://bigbrotherv01.runasp.net/api/Attendance/${Id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log('API Response (ID):', data);
       const attendanceData = data.value;
       if (Array.isArray(attendanceData)) {
@@ -386,6 +546,11 @@ export default function Attendance() {
       }
     } catch (err) {
       console.log('Error (ID Search):', err);
+      if (err.response?.status === 401) {
+        alert('غير مصرح: برجاء تسجيل الدخول مرة أخرى.');
+      } else {
+        alert('فشل في جلب بيانات الحضور. برجاء المحاولة مرة أخرى.');
+      }
       setAttendance([]);
       setTotalPages(1);
     }
@@ -394,7 +559,16 @@ export default function Attendance() {
   // Fetch attendance data for a specific student by ID
   async function getAttendanceId(StudentId) {
     try {
-      let { data } = await axios.get(`https://bigbrotherv01.runasp.net/api/Attendance/for-student/${StudentId}`);
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found. Please log in.');
+      }
+
+      let { data } = await axios.get(`https://bigbrotherv01.runasp.net/api/Attendance/for-student/${StudentId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log('API Response (Student ID):', data);
       const attendanceData = data.value;
       if (Array.isArray(attendanceData)) {
@@ -406,6 +580,11 @@ export default function Attendance() {
       }
     } catch (err) {
       console.log('Error (Student ID Search):', err);
+      if (err.response?.status === 401) {
+        alert('غير مصرح: برجاء تسجيل الدخول مرة أخرى.');
+      } else {
+        alert('فشل في جلب بيانات الحضور. برجاء المحاولة مرة أخرى.');
+      }
       setAttendance([]);
       setTotalPages(1);
     }
@@ -414,14 +593,23 @@ export default function Attendance() {
   // Fetch attendance data for a specific course with pagination
   async function getAttendanceByCourse(courseId, pageNumber) {
     try {
-      let { data } = await axios.get(
-        `https://bigbrotherv01.runasp.net/api/Attendance/for-course?courseId=${courseId}&PageNumber=${pageNumber}&PageSize=${fixedPageSize}`
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found. Please log in.');
+      }
+
+      const { data } = await axios.get(
+        `https://bigbrotherv01.runasp.net/api/Attendance/for-course?courseId=${courseId}&PageNumber=${pageNumber}&PageSize=${fixedPageSize}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      console.log('API Response (Course):', data); // Debug: Log the full response
-      // The response has a "value" object with "items" and pagination metadata
+      console.log('API Response (Course):', data);
       const attendanceData = data.value?.items || [];
       const totalPagesFromApi = data.value?.totalPages || 1;
-      console.log('Attendance Data:', attendanceData, 'Total Pages:', totalPagesFromApi); // Debug
+      console.log('Attendance Data:', attendanceData, 'Total Pages:', totalPagesFromApi);
       if (Array.isArray(attendanceData) && attendanceData.length > 0) {
         setAttendance(attendanceData);
         setTotalPages(totalPagesFromApi);
@@ -430,7 +618,14 @@ export default function Attendance() {
         setTotalPages(1);
       }
     } catch (err) {
-      console.log('Error (Course Search):', err);
+      console.error('Error (Course Search):', err);
+      if (err.response?.status === 401) {
+        alert('غير مصرح: برجاء تسجيل الدخول مرة أخرى.');
+        // Optionally redirect to login page
+        // window.location.href = '/login';
+      } else {
+        alert('فشل في جلب بيانات الحضور للكورس. برجاء المحاولة مرة أخرى.');
+      }
       setAttendance([]);
       setTotalPages(1);
     }
@@ -438,19 +633,28 @@ export default function Attendance() {
 
   // Download attendance data as a file
   async function downloadAttendance() {
-    if (!searchCourseId) {
-      alert('Please enter a Course ID to download attendance.');
+    if (!selectedCourseId) {
+      alert('برجاء اختيار معرف الكورس لتحميل بيانات الحضور.');
       return;
     }
     try {
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found. Please log in.');
+      }
+
       const response = await axios.get(
-        `https://bigbrotherv01.runasp.net/api/Attendance/download?courseId=${searchCourseId}`,
-        { responseType: 'blob' }
+        `https://bigbrotherv01.runasp.net/api/Attendance/download?courseId=${selectedCourseId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: 'blob',
+        }
       );
       console.log('Download Response:', response);
 
-      // Extract filename from content-disposition header if available
-      let filename = `attendance_course_${searchCourseId}.xlsx`;
+      let filename = `attendance_course_${selectedCourseId}.xlsx`;
       const disposition = response.headers['content-disposition'];
       if (disposition && disposition.indexOf('attachment') !== -1) {
         const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
@@ -460,21 +664,24 @@ export default function Attendance() {
         }
       }
 
-      // Create Blob with the correct content-type
       const blob = new Blob([response.data], {
         type: response.headers['content-type'] || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', filename); // Use the filename from API
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.log('Error (Download):', err);
-      alert('Failed to download the attendance file. Please try again.');
+      if (err.response?.status === 401) {
+        alert('غير مصرح: برجاء تسجيل الدخول مرة أخرى.');
+      } else {
+        alert('فشل في تحميل ملف الحضور. برجاء المحاولة مرة أخرى.');
+      }
     }
   }
 
@@ -504,6 +711,7 @@ export default function Attendance() {
   // Handle search form submission for Student ID
   const handleStudentSearch = (e) => {
     e.preventDefault();
+    setSelectedCourseId(''); // Clear selected course when searching by student ID
     if (searchStudentId.trim() === '') {
       setAttendance([]); // Clear attendance if search is empty
       setTotalPages(1);
@@ -512,25 +720,33 @@ export default function Attendance() {
     }
   };
 
-  // Handle search form submission for Course ID
+  // Handle course selection change
   const handleCourseSearch = (e) => {
-    e.preventDefault();
-    if (searchCourseId.trim() === '') {
-      setAttendance([]); // Clear attendance if search is empty
-      setTotalPages(1);
-      return;
-    }
+    const courseId = e.target.value;
+    setSelectedCourseId(courseId);
     setCurrentPage(1);
-    getAttendanceByCourse(searchCourseId, 1);
+    if (courseId) {
+      getAttendanceByCourse(courseId, 1);
+    } else {
+      setAttendance([]);
+      setTotalPages(1);
+    }
+  };
+
+  // Handle re-fetching data when the same course is re-selected
+  const handleCourseReSelect = () => {
+    if (selectedCourseId) {
+      setCurrentPage(1);
+      getAttendanceByCourse(selectedCourseId, 1);
+    }
   };
 
   // Handle page change for pagination
   const handlePageChange = (page) => {
-    console.log('Changing page to:', page); // Debug
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
-    if (searchCourseId) {
-      getAttendanceByCourse(searchCourseId, page);
+    if (selectedCourseId) {
+      getAttendanceByCourse(selectedCourseId, page);
     }
   };
 
@@ -553,19 +769,21 @@ export default function Attendance() {
     }
   };
 
-  const handleSearchCourseIdChange = (e) => {
-    const value = e.target.value;
-    setSearchCourseId(value);
-    if (value.trim() === '') {
-      setAttendance([]); // Clear data if the field is empty
-      setTotalPages(1);
+  // Fetch courses from localStorage on component mount
+  useEffect(() => {
+    const storedCourses = localStorage.getItem('courses');
+    if (storedCourses) {
+      setCourses(JSON.parse(storedCourses));
+    } else {
+      setCourses([]);
     }
-  };
+  }, []);
 
-  // Debug: Log the attendance state whenever it changes
+  // Debug: Log the attendance and courses state whenever it changes
   useEffect(() => {
     console.log('Current attendance state:', attendance, 'Total Pages:', totalPages);
-  }, [attendance, totalPages]);
+    console.log('Current courses state:', courses);
+  }, [attendance, totalPages, courses]);
 
   return (
     <>
@@ -665,50 +883,33 @@ export default function Attendance() {
               </div>
             </div>
 
-            {/* Search Form for Course ID */}
+            {/* Select for Course ID */}
             <div className="grid grid-cols-2 gap-4 mb-5 items-center overflow-hidden">
-              <form className="max-w-md mx-auto mt-3" onSubmit={handleCourseSearch}>
+              <div className="max-w-lg mx-auto mt-3">
                 <div className="relative">
-                  <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-gray-500 dark:text-gray-400"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                      />
-                    </svg>
-                  </div>
-                  <input
-                    type="search"
-                    className="block w-full p-3 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white shadow-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
-                    placeholder="Enter course ID to search..."
-                    value={searchCourseId}
-                    onChange={handleSearchCourseIdChange}
-                  />
+                  <select
+                    value={selectedCourseId}
+                    onChange={handleCourseSearch}
+                    onClick={handleCourseReSelect}
+                    className="block w-full p-4 ps-10 text-base text-gray-900 border border-gray-300 rounded-lg bg-white shadow-md focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
+                  >
+                    <option value="">Select a course...</option>
+                    {courses.map((course) => (
+                      <option key={course.courseId} value={course.courseId}>
+                        {course.courseName} (ID: {course.courseId})
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              </form>
+              </div>
               <div className="flex space-x-2">
-                <button
-                  type="submit"
-                  onClick={handleCourseSearch}
-                  className="bg-green-700 text-white px-6 py-2 rounded-lg shadow-md hover:bg-green-800 transition duration-200 font-semibold"
-                >
-                  Search
-                </button>
+                {/* No search button needed, selection triggers the fetch */}
               </div>
             </div>
 
             {/* Pagination Controls and Download Button (Above Table) */}
-            {(totalPages > 1 || searchCourseId) && (
+            {(totalPages > 1 || selectedCourseId) && (
               <div className="flex justify-center mb-4 space-x-2">
-                {console.log('Rendering Pagination Controls', { currentPage, totalPages })} {/* Debug */}
                 {totalPages > 1 && (
                   <>
                     <button
@@ -730,7 +931,7 @@ export default function Attendance() {
                     </button>
                   </>
                 )}
-                {searchCourseId && (
+                {selectedCourseId && (
                   <button
                     onClick={downloadAttendance}
                     className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition"
@@ -740,11 +941,10 @@ export default function Attendance() {
                 )}
               </div>
             )}
-           
 
-            {/* Scrollable Table Container  w-full md:w-[95%] mx-auto overflow-x-auto border-[#6B4A4A] rounded-xl mt-9 */}
-            <div className=" w-full md:w-[103%] mx-auto overflow-x-auto border-[#6B4A4A] rounded-xl mt-9 ">
-             <table className="w-full   border-collapse border-8 bg-[#D9D9D9]/30 min-h-full">
+            {/* Scrollable Table Container */}
+            <div className="w-full md:w-[103%] mx-auto overflow-x-auto border-[#6B4A4A] rounded-xl mt-9">
+              <table className="w-full border-collapse border-8 bg-[#D9D9D9]/30 min-h-full">
                 <thead className="bg-[#FFFFFF]/69 text-[#000000] text-sm md:text-base">
                   <tr className="text-center">
                     <th className="px-3 py-4 border border-[#6B4A4A] whitespace-nowrap">id</th>

@@ -12,7 +12,7 @@ import Addone from './component/Addone/Addone'
 import NotFound from './component/NotFound/NotFound'
 import ShowCourse from './component/ShowCourse/ShowCourse'
 import Home from './component/Home/Home'
-// import Register from './component/Register/Register'
+ import Register from './component/Register/Register'
  import Login from './component/Login/Login'
 import ConttextProvider from './ContextProvider/ContextProvider'
 import Upload from './component/Upload/Upload'
@@ -32,7 +32,7 @@ export default function App() {
     {path:"/Addone",element:<Addone/>},
     {path:"/showcourse",element:<ShowCourse/>},
     {path:"/Home",element:<Home/>},
-    // {path:"/Register",element:<Register/>},
+     {path:"/Register",element:<Register/>},
     {path:"/Attandance",element:<Attandance/>},
     {path:"/Upload",element:<Upload/>},
     {path:"/AddAssistant",element:<AddAssistant/>},
