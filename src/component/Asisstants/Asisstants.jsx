@@ -149,16 +149,34 @@
 
 
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import image from '../../assets/image1.jpg';
 
 export default function Students() {
   const [students, setStudents] = useState([]);
   const [studentSearchTerm, setStudentSearchTerm] = useState(""); // For student search
+  const [courses, setCourses] = useState([]); // State to store courses list
   
+  // Fetch courses from localStorage on component mount
+  useEffect(() => {
+    const storedCourses = localStorage.getItem('courses');
+    if (storedCourses) {
+      setCourses(JSON.parse(storedCourses));
+    } else {
+      setCourses([]);
+    }
+  }, []);
+
   // Fetch student data by ID
   async function getStudents(id) {
+    // Check if there are courses in localStorage
+    const storedCourses = JSON.parse(localStorage.getItem("courses")) || [];
+    if (storedCourses.length === 0) {
+      setStudents([]);
+      return;
+    }
+
     try {
       let { data } = await axios.get(`https://bigbrotherv01.runasp.net/api/Asisstant/asisstants-for-course${id}`);
       console.log("student", data);

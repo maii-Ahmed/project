@@ -28,8 +28,26 @@ import { Link } from 'react-router-dom';
 export default function ShowCourse() {
   let [attendance, setAttendance] = useState(null);
   let [searchTerm, setSearchTerm] = useState('');
+  let [courses, setCourses] = useState([]); // State to store courses list
+
+  // Fetch courses from localStorage on component mount
+  useEffect(() => {
+    const storedCourses = localStorage.getItem('courses');
+    if (storedCourses) {
+      setCourses(JSON.parse(storedCourses));
+    } else {
+      setCourses([]);
+    }
+  }, []);
 
   async function getProduct(id) {
+    // Check if there are courses in localStorage
+    const storedCourses = JSON.parse(localStorage.getItem("courses")) || [];
+    if (storedCourses.length === 0) {
+      setAttendance([]);
+      return;
+    }
+
     try {
       if (!id) return;
       let { data } = await axios.get(
@@ -55,10 +73,6 @@ export default function ShowCourse() {
       setAttendance([]); // مسح الداتا من الجدول لو السيرش فاضي
     }
   };
-
-  useEffect(() => {
-    // لن نستدعي الدالة تلقائيًا بدون ID
-  }, []);
 
   return (
     <>
@@ -100,7 +114,7 @@ export default function ShowCourse() {
             <div>
               <h2 className="mb-2 text-yellow-300 text-[20px]">
                 <i className="fa-solid fa-grip-lines-vertical text-white text-2xl me-4"></i>
-                ALL COURSE <span className="text-white">: 8</span>
+                ALL COURSE <span className="text-white">: {courses.length}</span>
               </h2>
               <h2 className="mb-8 text-yellow-300 text-[20px]">
                 <i className="fa-solid fa-grip-lines-vertical text-white text-2xl me-4"></i>
